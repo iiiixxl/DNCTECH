@@ -1,0 +1,81 @@
+@Authorization_Extend_HostAddress = http://localhost:5xxx
+
+### 登录 Admin（权限多）
+POST {{Authorization_Extend_HostAddress}}/Auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### 登录 User（权限少）
+POST {{Authorization_Extend_HostAddress}}/Auth/login
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "123456"
+}
+
+### ── 动态权限 ──
+
+### 动态权限 - 查看图书（User 可访问）
+GET {{Authorization_Extend_HostAddress}}/api/books
+
+### 动态权限 - 创建图书（仅 Admin）
+POST {{Authorization_Extend_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "新书名"
+}
+
+### 动态权限 - 查看销售日报（User 可访问）
+GET {{Authorization_Extend_HostAddress}}/api/reports/SALES_DAILY/data
+
+### 动态权限 - 查看库存月报（User 不可访问）
+GET {{Authorization_Extend_HostAddress}}/api/reports/STOCK_MONTHLY/data
+
+### 动态权限 - 权限树
+GET {{Authorization_Extend_HostAddress}}/api/permission-admin/tree
+
+### ── 原生 Policy ──
+
+### 原生 - 查看图书（Admin/User 均可）
+GET {{Authorization_Extend_HostAddress}}/api/native-books
+
+### 原生 - 创建图书（仅 Admin）
+POST {{Authorization_Extend_HostAddress}}/api/native-books
+Content-Type: application/json
+
+{
+  "title": "新书名"
+}
+
+### ── 扩展原生 · 简化 Role ──
+
+### 简化原生 - 查看图书
+GET {{Authorization_Extend_HostAddress}}/api/simple-native-books
+
+### 简化原生 - 创建图书（仅 Admin）
+POST {{Authorization_Extend_HostAddress}}/api/simple-native-books
+Content-Type: application/json
+
+{
+  "title": "新书名"
+}
+
+### ── 极简 PolicyCode（策略名 = 权限编码，userId 查库）──
+
+### 查看当前用户 PolicyCode 权限
+GET {{Authorization_Extend_HostAddress}}/api/policy-code/me/permissions
+
+### PolicyCode - 查看用户（admin/user 均可）
+GET {{Authorization_Extend_HostAddress}}/api/policy-code
+
+### PolicyCode - 删除用户（仅 admin，user 返回 403）
+DELETE {{Authorization_Extend_HostAddress}}/api/policy-code/1
+
+### PolicyCode - 创建订单（仅 admin）
+POST {{Authorization_Extend_HostAddress}}/api/policy-code/orders

@@ -1,0 +1,30 @@
+### Cookie 登录
+POST {{Authentication_jwt_cookie_HostAddress}}/Auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### Cookie 登出
+POST {{Authentication_jwt_cookie_HostAddress}}/Auth/logout
+
+### Cookie 认证 - 获取用户列表
+GET {{Authentication_jwt_cookie_HostAddress}}/User
+
+### JWT 登录
+POST {{Authentication_jwt_cookie_HostAddress}}/JwtAuth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### JWT 认证 - 获取商品（需替换 {{token}}）
+GET {{Authentication_jwt_cookie_HostAddress}}/Product/1
+Authorization: Bearer {{token}}
+
+### Cookie 认证 - 获取商品（登录后 Cookie 自动携带）
+GET {{Authentication_jwt_cookie_HostAddress}}/Product/1
