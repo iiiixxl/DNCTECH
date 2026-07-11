@@ -1,22 +1,23 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
-namespace Authorization_Extend.Permissions.Authorization;
+namespace Authorization_Extend.PolicyCodeAuthorization;
 
 /// <summary>
-/// 仿 ABP 动态 Policy 提供器：策略名 = 权限名，按需构建，无需逐个 AddPolicy。
-/// 仅服务于 Permissions（仿 ABP）模块，不涉及其它授权方案。
+/// 极简（原生扩展）动态 Policy 提供器：策略名 = 权限编码，按需现场构建，无需 AddPolicy。
+/// 完全独立于 Permissions（仿 ABP）模块，仅服务于 PolicyCode 方案。
 /// </summary>
 /// <remarks>
-/// 路由规则（与原生 AddPolicy 共存）：
+/// 路由规则：
 /// 1. Program 中显式 AddPolicy 注册的 → 优先使用原生策略
-/// 2. 其余未注册的策略名 → PermissionAuthorizationRequirement（ABP 角色授权）
+/// 2. 命中 PolicyCodePermissionNames 集合 → PermissionCodeRequirement（用户直查库）
+/// 3. 其余策略名 → 交回默认 Provider，避免误吞其它方案的策略
 /// </remarks>
-public class PermissionPolicyProvider : IAuthorizationPolicyProvider
+public class PolicyCodePolicyProvider : IAuthorizationPolicyProvider
 {
     private readonly DefaultAuthorizationPolicyProvider _fallback;
 
-    public PermissionPolicyProvider(IOptions<AuthorizationOptions> options)
+    public PolicyCodePolicyProvider(IOptions<AuthorizationOptions> options)
     {
         _fallback = new DefaultAuthorizationPolicyProvider(options);
     }
@@ -35,12 +36,15 @@ public class PermissionPolicyProvider : IAuthorizationPolicyProvider
             return registered;
         }
 
-        // 其余策略名 → ABP 角色授权 Requirement
-        var policy = new AuthorizationPolicyBuilder()
-            .AddRequirements(new PermissionAuthorizationRequirement(policyName))
-            .Build();
+        // 极简方案：策略名在 PolicyCode 集合中 → 用户直查库 Handler
+        if (PolicyCodePermissionNames.All.Contains(policyName))
+        {
+            return new AuthorizationPolicyBuilder()
+                .AddRequirements(new PermissionCodeRequirement(policyName))
+                .Build();
+        }
 
-        return policy;
+        return null;
     }
 
     public Task<AuthorizationPolicy> GetDefaultPolicyAsync() => _fallback.GetDefaultPolicyAsync();
