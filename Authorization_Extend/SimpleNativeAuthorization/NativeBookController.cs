@@ -1,10 +1,9 @@
 using Authorization_Extend.Models;
-using Authorization_Extend.SimpleNativeAuthorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authorization_Extend.Controllers;
+namespace Authorization_Extend.SimpleNativeAuthorization;
 
 /// <summary>
 /// 【原生授权】ASP.NET Core 标准做法：Program 中 AddPolicy + [Authorize(Policy = "...")]。

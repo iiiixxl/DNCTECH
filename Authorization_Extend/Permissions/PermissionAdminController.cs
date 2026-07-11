@@ -1,11 +1,10 @@
 using Authorization_Extend.Models;
-using Authorization_Extend.Permissions;
 using Authorization_Extend.Permissions.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authorization_Extend.Controllers;
+namespace Authorization_Extend.Permissions;
 
 /// <summary>
 /// 权限授予管理：模拟 ABP 权限管理页「给角色勾选权限」。

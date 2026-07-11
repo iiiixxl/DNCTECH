@@ -1,10 +1,9 @@
 using Authorization_Extend.Models;
-using Authorization_Extend.SimpleNativeAuthorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authorization_Extend.Controllers;
+namespace Authorization_Extend.SimpleNativeAuthorization;
 
 /// <summary>
 /// 【扩展原生 · 简化版】在原生 Role 授权基础上封装 RequireRoles 特性，无需 AddPolicy。

@@ -1,9 +1,8 @@
-using Authorization_Extend.PolicyCodeAuthorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authorization_Extend.Controllers;
+namespace Authorization_Extend.PolicyCodeAuthorization;
 
 /// <summary>
 /// 【极简动态权限】策略名 = 权限编码，Provider 动态构建 Policy，Handler 按 userId 查库。

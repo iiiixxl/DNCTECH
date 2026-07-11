@@ -79,3 +79,107 @@ DELETE {{Authorization_Extend_HostAddress}}/api/policy-code/1
 
 ### PolicyCode - 创建订单（仅 admin）
 POST {{Authorization_Extend_HostAddress}}/api/policy-code/orders
+
+### ── 基于资源的动态授权（传入订单实例，校验归属）──
+
+### 资源授权 - 列出全部订单（不做资源校验，仅对照观察）
+GET {{Authorization_Extend_HostAddress}}/api/resource-orders
+
+### 资源授权 - 退款(数据所有权)：仅订单创建者本人可退
+### 订单 2 归属 user-normal：user 可退，admin 退返回 403
+POST {{Authorization_Extend_HostAddress}}/api/resource-orders/2/refund
+
+### 资源授权 - 退款：订单 1 归属 user-admin，user 退返回 403
+POST {{Authorization_Extend_HostAddress}}/api/resource-orders/1/refund
+
+### 资源授权 - 查看详情(多租户)：仅同租户可看
+### 订单 1 属 tenant-a：admin 可看，user(tenant-b) 返回 403
+GET {{Authorization_Extend_HostAddress}}/api/resource-orders/1
+
+### ── 字段级动态授权（同一薪资资源，按 FieldPermission 裁剪字段）──
+
+### 字段授权 - 查看当前用户持有的字段权限 Claim
+GET {{Authorization_Extend_HostAddress}}/api/field-employees/me/field-permissions
+
+### 字段授权 - 查看自己的薪资档案
+### user → 仅 Name + BaseSalary；admin → 另含 Bonus、SocialSecurity
+GET {{Authorization_Extend_HostAddress}}/api/field-employees/me
+
+### 字段授权 - 列出员工 Id（方便知道可查哪些人）
+GET {{Authorization_Extend_HostAddress}}/api/field-employees
+
+### 字段授权 - 查看张三(user-normal)档案：用 user 登录 → Bonus/社保为 null
+GET {{Authorization_Extend_HostAddress}}/api/field-employees/user-normal
+
+### 字段授权 - 同上：用 admin 登录 → 奖金、社保明细全部可见
+GET {{Authorization_Extend_HostAddress}}/api/field-employees/user-normal
+
+### ── 声明转换（登录后动态补充细粒度声明）──
+
+### 声明转换 - 查看转换后的全部声明（能看到 department / 补充的 Role / permission）
+GET {{Authorization_Extend_HostAddress}}/api/claims-demo/me
+
+### 声明转换 - 财务报表：需 FinanceAdmin（admin 通过，user 403）
+GET {{Authorization_Extend_HostAddress}}/api/claims-demo/finance-report
+
+### 声明转换 - 财务审批：需 finance.approve 权限声明（admin 通过，user 403）
+POST {{Authorization_Extend_HostAddress}}/api/claims-demo/finance-approve
+
+### 声明转换 - 编辑文章：需 ContentEditor（user 通过，admin 403）
+PUT {{Authorization_Extend_HostAddress}}/api/claims-demo/articles/1
+
+### ── 临时权限授予（时效性令牌：声明转换 + Handler 校验 TempValidUntil）──
+
+### 临时权限 - 用 admin 登录后，给 user-normal 授予 2 小时代审权
+POST {{Authorization_Extend_HostAddress}}/api/temp-permission/grant
+Content-Type: application/json
+
+{
+  "granteeUserId": "user-normal",
+  "permission": "expense.approve",
+  "durationMinutes": 120
+}
+
+### 临时权限 - 快速演示过期：只开约 3 秒（0.05 分钟），到期后代审返回 403
+POST {{Authorization_Extend_HostAddress}}/api/temp-permission/grant
+Content-Type: application/json
+
+{
+  "granteeUserId": "user-normal",
+  "permission": "expense.approve",
+  "durationMinutes": 0.05
+}
+
+### 临时权限 - 查看授权记录（Admin）
+GET {{Authorization_Extend_HostAddress}}/api/temp-permission/grants/user-normal
+
+### 临时权限 - 用 user 登录后，查看转换器注入的临时声明
+GET {{Authorization_Extend_HostAddress}}/api/temp-permission/me
+
+### 临时权限 - 代审报销单：有未过期临时权限 → 200；未授权/已过期 → 403
+POST {{Authorization_Extend_HostAddress}}/api/temp-permission/expenses/1001/approve
+
+### 临时权限 - 主管主动撤销（立即失效）
+POST {{Authorization_Extend_HostAddress}}/api/temp-permission/revoke
+Content-Type: application/json
+
+{
+  "granteeUserId": "user-normal",
+  "permission": "expense.approve"
+}
+
+### ── 自定义授权结果处理器（拒绝时返回结构化 JSON）──
+
+### 结果处理器 - 未登录访问：不带 Cookie → 自定义 401 JSON（Accept: application/json）
+GET {{Authorization_Extend_HostAddress}}/api/auth-result/need-login
+Accept: application/json
+
+### 结果处理器 - 未登录访问：浏览器页面请求 → 302 跳登录页
+GET {{Authorization_Extend_HostAddress}}/api/auth-result/need-login
+Accept: text/html
+
+### 结果处理器 - 已登录访问：先登录后再请求 → 正常 200
+GET {{Authorization_Extend_HostAddress}}/api/auth-result/need-login
+
+### 结果处理器 - 无权限访问：用 user 登录后请求 → 自定义 403 JSON（code=40301）
+GET {{Authorization_Extend_HostAddress}}/api/auth-result/admin-only

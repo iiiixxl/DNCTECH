@@ -1,12 +1,11 @@
 using Authorization_Extend.Models;
-using Authorization_Extend.Permissions;
 using Authorization_Extend.Permissions.Authorization;
 using Authorization_Extend.Permissions.Reports;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authorization_Extend.Controllers;
+namespace Authorization_Extend.Permissions;
 
 /// <summary>
 /// 【动态权限】报表示例：新增报表时注册动态权限，访问时用 Reports.View.{code} 校验。

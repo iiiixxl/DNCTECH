@@ -1,9 +1,8 @@
-using Authorization_Extend.PolicyCodeAuthorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Authorization_Extend.Controllers;
+namespace Authorization_Extend.PolicyCodeAuthorization;
 
 /// <summary>
 /// 查看当前登录用户拥有的 PolicyCode 权限（调试用）。
