@@ -13,7 +13,7 @@ namespace Authorization_Extend.ResourceBasedAuthorization;
 /// - 本方案回答的是「你能不能退『这张』订单」（资源权限，必须拿到订单实例才能判断）。
 ///
 /// 做法：在业务逻辑里注入 IAuthorizationService，调用 AuthorizeAsync(User, 资源对象, 策略名)，
-/// 由资源型 Handler(AuthorizationHandler&lt;TRequirement, TResource&gt;) 比对资源归属。
+/// 由通用资源型 Handler（泛型第二参数为 IOwnedResource / ITenantScoped 接口）比对资源归属。
 /// 这样即使用户有 orders.refund 功能权限，也退不了别人 / 别租户的订单，堵住越权漏洞。
 /// </remarks>
 [ApiController]
@@ -35,7 +35,7 @@ public class ResourceOrderController : ControllerBase
     public IActionResult GetAll() => Ok(new { approach = "resource-based", data = _orderStore.All() });
 
     /// <summary>
-    /// 退款：必须是「订单创建者本人」才能退。演示数据所有权控制。
+    /// 退款：必须「同租户」且「本人创建」才能退。一条策略挂两个 Requirement，不用写第三个 Handler。
     /// </summary>
     [HttpPost("{id:int}/refund")]
     public async Task<IActionResult> Refund(int id)
@@ -46,11 +46,11 @@ public class ResourceOrderController : ControllerBase
             return NotFound(new { message = $"订单 {id} 不存在" });
         }
 
-        // 关键：把「具体资源对象」交给授权系统，而不只是检查一个策略名
+        // OwnerInTenant = SameTenantRequirement + OwnedResourceRequirement（AND）
         var result = await _authorizationService.AuthorizeAsync(
             User,
             order,
-            ResourceAuthorizationPolicyNames.OrderOwner);
+            ResourceAuthorizationPolicyNames.OwnerInTenant);
 
         if (!result.Succeeded)
         {

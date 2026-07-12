@@ -9,6 +9,11 @@ public static class ResourceAuthorizationPolicyNames
     /// <summary>多租户隔离：订单必须属于当前用户所在租户。</summary>
     public const string SameTenant = "Resource.SameTenant";
 
-    /// <summary>数据所有权：订单必须由当前用户本人创建。</summary>
-    public const string OrderOwner = "Resource.OrderOwner";
+    /// <summary>数据所有权：资源归属人必须是当前用户本人（适用于所有 IOwnedResource）。</summary>
+    public const string Owner = "Resource.Owner";
+
+    /// <summary>
+    /// 租户 + 归属人：同租户且必须是本人。策略内挂两个 Requirement，框架会分别调两个 Handler，全部通过才放行。
+    /// </summary>
+    public const string OwnerInTenant = "Resource.OwnerInTenant";
 }

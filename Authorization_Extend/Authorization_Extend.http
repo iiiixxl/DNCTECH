@@ -85,12 +85,24 @@ POST {{Authorization_Extend_HostAddress}}/api/policy-code/orders
 ### 资源授权 - 列出全部订单（不做资源校验，仅对照观察）
 GET {{Authorization_Extend_HostAddress}}/api/resource-orders
 
-### 资源授权 - 退款(数据所有权)：仅订单创建者本人可退
+### 资源授权 - 退款(数据所有权)：仅资源归属人本人可操作（Order / Contract 共用同一 Handler）
 ### 订单 2 归属 user-normal：user 可退，admin 退返回 403
 POST {{Authorization_Extend_HostAddress}}/api/resource-orders/2/refund
 
 ### 资源授权 - 退款：订单 1 归属 user-admin，user 退返回 403
 POST {{Authorization_Extend_HostAddress}}/api/resource-orders/1/refund
+
+### 资源授权 - 编辑合同：与订单共用 Resource.Owner 策略，非本人返回 403
+PUT {{Authorization_Extend_HostAddress}}/api/resource-contracts/2
+Content-Type: application/json
+
+"新标题"
+
+### 资源授权 - 编辑合同：合同 1 归属 user-admin，user 编辑返回 403
+PUT {{Authorization_Extend_HostAddress}}/api/resource-contracts/1
+Content-Type: application/json
+
+"越权修改"
 
 ### 资源授权 - 查看详情(多租户)：仅同租户可看
 ### 订单 1 属 tenant-a：admin 可看，user(tenant-b) 返回 403

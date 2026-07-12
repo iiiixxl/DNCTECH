@@ -5,7 +5,7 @@ namespace Authorization_Extend.ResourceBasedAuthorization;
 /// 基于资源的授权，判断的不是「你能不能退款」这种功能权限，
 /// 而是「你能不能退『这一张』订单」——所以必须把具体资源实例交给 Handler 去比对。
 /// </summary>
-public class Order
+public class Order : ITenantOwnedResource
 {
     public int Id { get; init; }
 
