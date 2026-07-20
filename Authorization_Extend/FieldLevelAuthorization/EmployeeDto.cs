@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Authorization_Extend.FieldLevelAuthorization;
 
 /// <summary>
@@ -12,12 +14,15 @@ public class EmployeeDto
     public string Name { get; set; } = string.Empty;
 
     /// <summary>基本工资。有 BaseSalary 字段权限时才赋值。</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public decimal? BaseSalary { get; set; }
 
-    /// <summary>绩效奖金。有 Bonus 字段权限时才赋值；否则为 null（响应里可省略或显式 null）。</summary>
+    /// <summary>绩效奖金。有 Bonus 字段权限时才赋值；否则不写入响应。</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public decimal? Bonus { get; set; }
 
     /// <summary>社保明细。有 SocialSecurity 字段权限时才赋值。</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? SocialSecurityDetail { get; set; }
 
     /// <summary>本次响应实际暴露了哪些字段（便于联调观察，生产可去掉）。</summary>

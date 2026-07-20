@@ -10,6 +10,7 @@ public class FieldAccessRequirement : IAuthorizationRequirement
 {
     public FieldAccessRequirement(string fieldName)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fieldName);
         FieldName = fieldName;
     }
 

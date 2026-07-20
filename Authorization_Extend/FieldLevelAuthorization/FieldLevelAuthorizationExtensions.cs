@@ -12,8 +12,14 @@ public static class FieldLevelAuthorizationExtensions
 {
     public static IServiceCollection AddFieldLevelAuthorization(this IServiceCollection services)
     {
+        // 让本模块可单独启用；重复调用会合并，不会覆盖已有授权配置。
+        services.AddAuthorization();
+
         services.AddSingleton<IEmployeeStore, InMemoryEmployeeStore>();
         services.AddScoped<EmployeeService>();
+
+        // 先做行级资源授权，阻止跨用户读取档案。
+        services.AddSingleton<IAuthorizationHandler, EmployeeProfileAccessHandler>();
 
         // 资源型 Handler：AuthorizationHandler&lt;FieldAccessRequirement, EmployeeDto&gt;
         // 框架在 AuthorizeAsync(user, dto, requirement) 时按类型自动路由到这里

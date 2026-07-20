@@ -102,16 +102,19 @@ GET {{Authorization_Extend_HostAddress}}/api/resource-orders/1
 GET {{Authorization_Extend_HostAddress}}/api/field-employees/me/field-permissions
 
 ### 字段授权 - 查看自己的薪资档案
-### user → 仅 Name + BaseSalary；admin → 另含 Bonus、SocialSecurity
+### user → 仅 Name + BaseSalary（未授权字段不会出现在 JSON）；admin → 另含 Bonus、SocialSecurity
 GET {{Authorization_Extend_HostAddress}}/api/field-employees/me
 
-### 字段授权 - 列出员工 Id（方便知道可查哪些人）
+### 字段授权 - 列出员工 Id（仅 admin 可访问；user 返回 403）
 GET {{Authorization_Extend_HostAddress}}/api/field-employees
 
-### 字段授权 - 查看张三(user-normal)档案：用 user 登录 → Bonus/社保为 null
+### 字段授权 - 查看张三(user-normal)档案：user 查看自己 → 仅基本工资
 GET {{Authorization_Extend_HostAddress}}/api/field-employees/user-normal
 
-### 字段授权 - 同上：用 admin 登录 → 奖金、社保明细全部可见
+### 字段授权 - user 查看王 HR(user-admin)档案 → 403（行级资源授权）
+GET {{Authorization_Extend_HostAddress}}/api/field-employees/user-admin
+
+### 字段授权 - admin 查看张三(user-normal)档案 → 奖金、社保明细全部可见
 GET {{Authorization_Extend_HostAddress}}/api/field-employees/user-normal
 
 ### ── 声明转换（登录后动态补充细粒度声明）──
