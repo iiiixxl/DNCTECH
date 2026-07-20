@@ -27,7 +27,7 @@ public class SimpleNativeBookController : ControllerBase
     ];
 
     [HttpGet]
-    [RequireRoles("Admin", "User")]
+    [Authorize(Roles = "Admin,User")]
     public IActionResult GetList()
     {
         return Ok(new { approach = "simple-native-roles", data = Books });

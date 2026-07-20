@@ -1,3 +1,4 @@
+using Authentication_jwt_cookie.DynamicClaims;
 using Authentication_jwt_cookie.Extensions;
 
 namespace Authentication_jwt_cookie;
@@ -6,12 +7,28 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        // ★★★ 在这里切换 Demo（二选一）★★★
+        var demo = AuthDemoMode.DynamicSession;
+        // var demo = AuthDemoMode.Classic;
+
         var builder = WebApplication.CreateBuilder(args);
 
-        // Cookie + JWT 双认证（配置细节见 Extensions/AuthenticationServiceExtensions.cs）
-        builder.Services.AddAppAuthentication();
+        switch (demo)
+        {
+            case AuthDemoMode.Classic:
+                // Controllers/：Auth、JwtAuth、User、Product
+                builder.Services.AddClassicDemoAuthentication();
+                break;
 
-        builder.Services.AddControllers();
+            case AuthDemoMode.DynamicSession:
+                // DynamicClaims/：login / me / logout（JWT + session_id）
+                builder.Services.AddDynamicSessionDemoAuthentication();
+                break;
+        }
+
+        builder.Services.AddAuthorization();
+        builder.Services.AddControllers(options =>
+            options.Conventions.Add(new AuthDemoControllerConvention(demo)));
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -25,8 +42,15 @@ public class Program
 
         app.UseHttpsRedirection();
 
-        // 认证中间件必须在 MapControllers 之前
         app.UseAuthentication();
+
+        // 仅 DynamicSession Demo 需要动态会话中间件
+        if (demo == AuthDemoMode.DynamicSession)
+        {
+            app.UseDynamicClaims();
+        }
+
+        app.UseAuthorization();
 
         app.MapControllers();
 
