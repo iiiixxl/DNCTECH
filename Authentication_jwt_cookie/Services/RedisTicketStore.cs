@@ -12,7 +12,7 @@ namespace Authentication_jwt_cookie.Services;
 /// 1. 安装 NuGet 包：Microsoft.Extensions.Caching.StackExchangeRedis
 /// 2. 注册 Redis 缓存：
 ///    builder.Services.AddStackExchangeRedisCache(o => o.Configuration = "localhost:6379");
-/// 3. 在 AuthenticationServiceExtensions 中将 ITicketStore 改为 RedisTicketStore
+/// 3. 在 ClassicDemoAuthenticationExtensions 中将 ITicketStore 改为 RedisTicketStore
 /// </remarks>
 public class RedisTicketStore : ITicketStore
 {

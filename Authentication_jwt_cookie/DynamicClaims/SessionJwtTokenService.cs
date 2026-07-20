@@ -2,25 +2,18 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Authentication_jwt_cookie.Services;
+namespace Authentication_jwt_cookie.DynamicClaims;
 
 /// <summary>
-/// JWT 令牌签发服务（原 Demo）。
-/// 签发参数与 appsettings.json 中 Authentication:Schemes:Bearer 保持一致。
+/// 按已组好的 Principal 签发 JWT（session_id 应由 Contributor 事先写入）。
 /// </summary>
-public class JwtTokenService
+public class SessionJwtTokenService
 {
     private readonly IConfiguration _configuration;
 
-    public JwtTokenService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
+    public SessionJwtTokenService(IConfiguration configuration) => _configuration = configuration;
 
-    /// <summary>
-    /// 为指定用户生成 JWT，客户端需在后续请求的 Authorization 头中携带。
-    /// </summary>
-    public string GenerateToken(string username)
+    public (string Token, DateTime ExpiresUtc) GenerateToken(ClaimsPrincipal principal)
     {
         var bearerSection = _configuration.GetSection(
             $"Authentication:Schemes:{JwtBearerDefaults.AuthenticationScheme}");
@@ -29,12 +22,7 @@ public class JwtTokenService
         var audience = bearerSection["ValidAudience"]!;
         var keyBase64 = bearerSection["SigningKeys:0:Value"]!;
         var expireHours = int.Parse(_configuration["Jwt:ExpireHours"] ?? "8");
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, "User")
-        };
+        var expiresUtc = DateTime.UtcNow.AddHours(expireHours);
 
         var signingKey = new SymmetricSecurityKey(Convert.FromBase64String(keyBase64));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
@@ -42,10 +30,10 @@ public class JwtTokenService
         var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
             issuer: issuer,
             audience: audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(expireHours),
+            claims: principal.Claims,
+            expires: expiresUtc,
             signingCredentials: credentials);
 
-        return new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(token);
+        return (new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(token), expiresUtc);
     }
 }

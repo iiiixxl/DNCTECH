@@ -1,3 +1,9 @@
+### ========== 启动类 Program.cs 中切换 AuthDemoMode ==========
+### Classic         → 下面「原 Demo」接口
+### DynamicSession  → 下面「DynamicClaims」接口
+
+### ========== 原 Demo：Cookie（AuthDemoMode.Classic）==========
+
 ### Cookie 登录
 POST {{Authentication_jwt_cookie_HostAddress}}/Auth/login
 Content-Type: application/json
@@ -12,6 +18,8 @@ POST {{Authentication_jwt_cookie_HostAddress}}/Auth/logout
 
 ### Cookie 认证 - 获取用户列表
 GET {{Authentication_jwt_cookie_HostAddress}}/User
+
+### ========== 原 Demo：JWT（AuthDemoMode.Classic）==========
 
 ### JWT 登录
 POST {{Authentication_jwt_cookie_HostAddress}}/JwtAuth/login
@@ -28,3 +36,42 @@ Authorization: Bearer {{token}}
 
 ### Cookie 认证 - 获取商品（登录后 Cookie 自动携带）
 GET {{Authentication_jwt_cookie_HostAddress}}/Product/1
+
+### ========== DynamicClaims Demo（AuthDemoMode.DynamicSession）==========
+
+### 1. 登录（返回含 session_id 的 token，角色快照 Admin+User）
+POST {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### 2. 查看当前身份（经 Dynamic Claims 覆盖后的 roles）
+GET {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/me
+Authorization: Bearer {{token}}
+
+### 3. Admin 专属（未改角色前应 200）
+GET {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/admin-only
+Authorization: Bearer {{token}}
+
+### 4. 热更新角色：去掉 Admin（Token 不用换）
+PUT {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/users/admin/roles
+Content-Type: application/json
+
+["User"]
+
+### 5. 再看 me → roles 只有 User；admin-only → 403
+GET {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/me
+Authorization: Bearer {{token}}
+
+GET {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/admin-only
+Authorization: Bearer {{token}}
+
+### 6. 撤销当前会话 → 再访问 me → 401
+POST {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/logout
+Authorization: Bearer {{token}}
+
+GET {{Authentication_jwt_cookie_HostAddress}}/dynamic-claims/me
+Authorization: Bearer {{token}}
