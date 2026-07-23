@@ -1,0 +1,33 @@
+@Refit_Demo_Host = http://127.0.0.1:5235
+@token = 
+
+### 1. 登录拿 JWT
+POST {{Refit_Demo_Host}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### 2. Refit：列表（Query）
+GET {{Refit_Demo_Host}}/refit-demo/todos?completed=false&limit=10
+
+### 3. Refit：单条（Task&lt;T&gt; / ApiException）
+GET {{Refit_Demo_Host}}/refit-demo/todos/1
+
+### 4. Refit：单条安全读（IApiResponse，故意 404）
+GET {{Refit_Demo_Host}}/refit-demo/todos/999/safe
+
+### 5. Refit：创建（Body）
+POST {{Refit_Demo_Host}}/refit-demo/todos
+Content-Type: application/json
+
+{
+  "title": "Created via Refit",
+  "completed": false
+}
+
+### 6. Refit + Auth Handler 转发 JWT（先把上面 login 返回的 token 填到 @token）
+GET {{Refit_Demo_Host}}/refit-demo/todos/secure/mine
+Authorization: Bearer {{token}}
