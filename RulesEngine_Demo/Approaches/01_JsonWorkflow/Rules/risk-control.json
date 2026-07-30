@@ -1,0 +1,105 @@
+{
+  "WorkflowName": "RiskControl",
+  "Rules": [
+    {
+      "RuleName": "Block_NewAccountLargeAmount",
+      "Enabled": true,
+      "Priority": 100,
+      "Operator": "And",
+      "SuccessEvent": "NEW_ACCOUNT_LARGE_AMOUNT",
+      "Rules": [
+        {
+          "RuleName": "YoungAccount",
+          "Expression": "risk.AccountAgeDays < 7"
+        },
+        {
+          "RuleName": "LargePay",
+          "Expression": "risk.Amount >= 3000"
+        }
+      ],
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"Block\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "Block_GeoMismatchNight",
+      "Enabled": true,
+      "Priority": 95,
+      "Expression": "risk.IpCountryMatchesBilling == false && risk.IsNightTime == true && risk.Amount >= 1000",
+      "SuccessEvent": "GEO_MISMATCH_NIGHT",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"Block\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "Block_BruteForceRetry",
+      "Enabled": true,
+      "Priority": 90,
+      "Expression": "risk.FailedAttempts1h >= 5 && risk.Amount >= 500",
+      "SuccessEvent": "BRUTE_FORCE_RETRY",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"Block\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "Review_AmountSpike",
+      "Enabled": true,
+      "Priority": 70,
+      "Expression": "risk.AvgOrderAmount30d > 0 && risk.Amount >= risk.AvgOrderAmount30d * 5",
+      "SuccessEvent": "AMOUNT_SPIKE_5X",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"Review\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "Review_UntrustedDevice",
+      "Enabled": true,
+      "Priority": 60,
+      "Expression": "risk.DeviceTrusted == false && risk.Amount >= 2000",
+      "SuccessEvent": "UNTRUSTED_DEVICE",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"Review\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "Pass_TrustedBaseline",
+      "Enabled": true,
+      "Priority": 10,
+      "Expression": "risk.DeviceTrusted == true && risk.IpCountryMatchesBilling == true && risk.FailedAttempts1h == 0 && risk.AccountAgeDays >= 30",
+      "SuccessEvent": "TRUSTED_BASELINE",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"Pass\""
+          }
+        }
+      }
+    }
+  ]
+}

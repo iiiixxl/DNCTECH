@@ -1,0 +1,95 @@
+{
+  "WorkflowName": "ShippingFee",
+  "Rules": [
+    {
+      "RuleName": "VipFreeShipping",
+      "Enabled": true,
+      "Priority": 100,
+      "Expression": "ship.MemberLevel == 3 && ship.OrderAmount >= 199 && ship.ShippingMethod == \"Standard\"",
+      "SuccessEvent": "FreeShipping",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "0"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "NormalFreeShippingThreshold",
+      "Enabled": true,
+      "Priority": 90,
+      "Expression": "ship.MemberLevel < 3 && ship.OrderAmount >= 399 && ship.ShippingMethod == \"Standard\" && ship.IsRemoteArea == false",
+      "SuccessEvent": "FreeShipping",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "0"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "BaseFeeByDistance",
+      "Enabled": true,
+      "Priority": 50,
+      "Expression": "true",
+      "SuccessEvent": "BaseFee",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "ship.DistanceKm <= 100 ? 8 : (ship.DistanceKm <= 1000 ? 12 : 18)"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "OverweightSurcharge",
+      "Enabled": true,
+      "Priority": 40,
+      "Expression": "ship.WeightKg > 1",
+      "SuccessEvent": "Overweight",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "RuleMath.Ceiling(Convert.ToDouble(ship.WeightKg - 1)) * 2"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "ExpressSurcharge",
+      "Enabled": true,
+      "Priority": 30,
+      "Expression": "ship.ShippingMethod == \"Express\" || ship.ShippingMethod == \"SameDay\"",
+      "SuccessEvent": "ExpressFee",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "ship.ShippingMethod == \"SameDay\" ? 25 : 15"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "RemoteAreaSurcharge",
+      "Enabled": true,
+      "Priority": 20,
+      "Expression": "ship.IsRemoteArea == true",
+      "SuccessEvent": "RemoteArea",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "20"
+          }
+        }
+      }
+    }
+  ]
+}

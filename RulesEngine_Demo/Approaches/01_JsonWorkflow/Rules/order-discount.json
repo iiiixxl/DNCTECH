@@ -1,0 +1,109 @@
+{
+  "WorkflowName": "OrderDiscount",
+  "Rules": [
+    {
+      "RuleName": "VipMemberDiscount",
+      "Enabled": true,
+      "Priority": 100,
+      "Expression": "customer.Level == 3",
+      "SuccessEvent": "VipDiscount15Off",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "0.85"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "GoldMemberDiscount",
+      "Enabled": true,
+      "Priority": 90,
+      "Expression": "customer.Level == 2",
+      "SuccessEvent": "GoldDiscount10Off",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "0.90"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "SilverMemberDiscount",
+      "Enabled": true,
+      "Priority": 80,
+      "Expression": "customer.Level == 1",
+      "SuccessEvent": "SilverDiscount5Off",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "0.95"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "ElectronicsFullReduce",
+      "Enabled": true,
+      "Priority": 70,
+      "Operator": "And",
+      "SuccessEvent": "ElectronicsMinus200",
+      "Rules": [
+        {
+          "RuleName": "IsElectronics",
+          "Expression": "order.Category == \"Electronics\""
+        },
+        {
+          "RuleName": "AmountOver2000",
+          "Expression": "order.Amount >= 2000"
+        },
+        {
+          "RuleName": "NotUsingCoupon",
+          "Expression": "order.UsedCoupon == false"
+        }
+      ],
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "-200"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "FirstOrderGift",
+      "Enabled": true,
+      "Priority": 60,
+      "Expression": "order.IsFirstOrder == true && order.Amount >= 99",
+      "SuccessEvent": "FirstOrderMinus50",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "-50"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "CouponSave100",
+      "Enabled": true,
+      "Priority": 50,
+      "Expression": "order.UsedCoupon == true && order.CouponCode == \"SAVE100\" && order.Amount >= 500",
+      "SuccessEvent": "CouponSAVE100",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "-100"
+          }
+        }
+      }
+    }
+  ]
+}

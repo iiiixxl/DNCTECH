@@ -1,0 +1,7 @@
+RuleName,MinAmount,MaxAmount,ExpenseType,VendorRisk,Route,SuccessEvent,Priority
+CapExMustCeo,0,,CapEx,,CEO -> FINANCE_VP -> DEPT_DIR,RouteCeo,1000
+VeryLargeAny,500000,,,,CEO -> FINANCE_VP -> DEPT_DIR,RouteCeo,950
+HighRiskVendor,10000,500000,,High,RISK_COMMITTEE -> FINANCE_VP -> DEPT_MANAGER,RouteRiskCommittee,900
+MarketingLarge,100000,500000,Marketing,,CMO -> FINANCE_MANAGER -> DEPT_MANAGER,RouteCmo,800
+MidAmountDeptDirector,20000,500000,,,DEPT_DIR -> DEPT_MANAGER,RouteDeptDir,500
+SmallAmountManager,0,20000,,,DEPT_MANAGER,RouteManager,100

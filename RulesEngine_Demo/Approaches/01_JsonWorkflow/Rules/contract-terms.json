@@ -1,0 +1,114 @@
+{
+  "WorkflowName": "ContractTerms",
+  "GlobalParams": [
+    {
+      "Name": "strategicFloor",
+      "Expression": "0.80"
+    }
+  ],
+  "Rules": [
+    {
+      "RuleName": "TierStrategicDiscount",
+      "Enabled": true,
+      "Priority": 100,
+      "Expression": "c.PartnerTier == \"Strategic\"",
+      "SuccessEvent": "TierStrategic",
+      "LocalParams": [
+        {
+          "Name": "baseDiscount",
+          "Expression": "c.AnnualCommitAmount >= 3000000 ? 0.82 : 0.88"
+        }
+      ],
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"discount:\" + baseDiscount"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "TierPreferredDiscount",
+      "Enabled": true,
+      "Priority": 90,
+      "Expression": "c.PartnerTier == \"Preferred\"",
+      "SuccessEvent": "TierPreferred",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"discount:0.92\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "TierStandardDiscount",
+      "Enabled": true,
+      "Priority": 80,
+      "Expression": "c.PartnerTier == \"Standard\"",
+      "SuccessEvent": "TierStandard",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"discount:0.97\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "LongCooperationNet60",
+      "Enabled": true,
+      "Priority": 70,
+      "Expression": "c.CooperationYears >= 3",
+      "SuccessEvent": "Net60",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"net:60\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "StrategicNet90",
+      "Enabled": true,
+      "Priority": 75,
+      "Expression": "c.PartnerTier == \"Strategic\" && c.AnnualCommitAmount >= 3000000",
+      "SuccessEvent": "Net90",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"net:90\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "GovernmentSpecialApproval",
+      "Enabled": true,
+      "Priority": 60,
+      "Expression": "c.IsGovernment == true || c.ProductLine == \"Hardware\"",
+      "SuccessEvent": "NeedSpecialApproval",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"needSpecialApproval:true\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "BelowStrategicFloorWarn",
+      "Enabled": true,
+      "Priority": 20,
+      "Expression": "c.PartnerTier == \"Strategic\" && c.AnnualCommitAmount < 1000000",
+      "SuccessEvent": "CommitBelowExpectation"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "WorkflowName": "OrderDiscountCustom",
+  "Rules": [
+    {
+      "RuleName": "VipMemberDiscount",
+      "Enabled": true,
+      "Priority": 100,
+      "Expression": "customer.Level == 3",
+      "SuccessEvent": "VipDiscount15Off",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "ApplyDiscount",
+          "Context": {
+            "Factor": "0.85"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "GoldMemberDiscount",
+      "Enabled": true,
+      "Priority": 90,
+      "Expression": "customer.Level == 2",
+      "SuccessEvent": "GoldDiscount10Off",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "ApplyDiscount",
+          "Context": {
+            "Factor": "0.90"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "SilverMemberDiscount",
+      "Enabled": true,
+      "Priority": 80,
+      "Expression": "customer.Level == 1",
+      "SuccessEvent": "SilverDiscount5Off",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "ApplyDiscount",
+          "Context": {
+            "Factor": "0.95"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "ElectronicsFullReduce",
+      "Enabled": true,
+      "Priority": 70,
+      "Operator": "And",
+      "SuccessEvent": "ElectronicsMinus200",
+      "Rules": [
+        {
+          "RuleName": "IsElectronics",
+          "Expression": "order.Category == \"Electronics\""
+        },
+        {
+          "RuleName": "AmountOver2000",
+          "Expression": "order.Amount >= 2000"
+        },
+        {
+          "RuleName": "NotUsingCoupon",
+          "Expression": "order.UsedCoupon == false"
+        }
+      ],
+      "Actions": {
+        "OnSuccess": {
+          "Name": "ApplyDiscount",
+          "Context": {
+            "Subtract": "200"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "VipAuditTrail",
+      "Enabled": true,
+      "Priority": 10,
+      "Expression": "customer.Level == 3",
+      "SuccessEvent": "VipAudited",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "SendAuditLog",
+          "Context": {
+            "Message": "VIP member discount applied — notify finance"
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "BigOrderAudit",
+      "Enabled": true,
+      "Priority": 5,
+      "Expression": "order.Amount >= 2000",
+      "SuccessEvent": "BigOrderAudited",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "SendAuditLog",
+          "Context": {
+            "Message": "large order touched discount engine"
+          }
+        }
+      }
+    }
+  ]
+}

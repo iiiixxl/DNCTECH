@@ -1,0 +1,108 @@
+{
+  "WorkflowName": "ApprovalRouting",
+  "Rules": [
+    {
+      "RuleName": "CapExMustCeo",
+      "Enabled": true,
+      "Properties": { "Priority": "1000" },
+      "Expression": "req.ExpenseType == \"CapEx\" || req.Amount >= 500000",
+      "SuccessEvent": "RouteCeo",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"CEO -> FINANCE_VP -> DEPT_DIR\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "HighRiskVendorEscalation",
+      "Enabled": true,
+      "Properties": { "Priority": "900" },
+      "Expression": "req.VendorRisk == \"High\" && req.Amount >= 10000 && req.Amount < 500000 && req.ExpenseType != \"CapEx\"",
+      "SuccessEvent": "RouteRiskCommittee",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"RISK_COMMITTEE -> FINANCE_VP -> DEPT_MANAGER\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "MarketingLargeUrgent",
+      "Enabled": true,
+      "Properties": { "Priority": "800" },
+      "Operator": "And",
+      "SuccessEvent": "RouteCmo",
+      "Rules": [
+        {
+          "RuleName": "IsMarketing",
+          "Expression": "req.ExpenseType == \"Marketing\""
+        },
+        {
+          "RuleName": "Over100k",
+          "Expression": "req.Amount >= 100000 && req.Amount < 500000"
+        },
+        {
+          "RuleName": "NotHighRisk",
+          "Expression": "req.VendorRisk != \"High\""
+        }
+      ],
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"CMO -> FINANCE_MANAGER -> DEPT_MANAGER\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "MidAmountDeptDirector",
+      "Enabled": true,
+      "Properties": { "Priority": "500" },
+      "Expression": "req.Amount >= 20000 && req.Amount < 500000 && req.ExpenseType != \"CapEx\" && req.VendorRisk != \"High\" && !(req.ExpenseType == \"Marketing\" && req.Amount >= 100000)",
+      "SuccessEvent": "RouteDeptDir",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"DEPT_DIR -> DEPT_MANAGER\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "SmallAmountManager",
+      "Enabled": true,
+      "Properties": { "Priority": "100" },
+      "Expression": "req.Amount < 20000 && req.ExpenseType != \"CapEx\"",
+      "SuccessEvent": "RouteManager",
+      "Actions": {
+        "OnSuccess": {
+          "Name": "OutputExpression",
+          "Context": {
+            "Expression": "\"DEPT_MANAGER\""
+          }
+        }
+      }
+    },
+    {
+      "RuleName": "UrgentFlag",
+      "Enabled": true,
+      "Properties": { "Priority": "50" },
+      "Expression": "req.IsUrgent == true",
+      "SuccessEvent": "Sla4Hours"
+    },
+    {
+      "RuleName": "MissingContractFlag",
+      "Enabled": true,
+      "Properties": { "Priority": "40" },
+      "Expression": "req.ExpenseType == \"Purchase\" && req.HasContract == false && req.Amount >= 5000",
+      "SuccessEvent": "RequireContractAttachment"
+    }
+  ]
+}

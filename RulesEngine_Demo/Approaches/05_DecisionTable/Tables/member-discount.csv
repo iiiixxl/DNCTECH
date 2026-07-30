@@ -1,0 +1,5 @@
+RuleName,MemberLevel,MinAmount,DiscountFactor,SuccessEvent,Priority
+NormalBase,0,0,1.00,NormalNoDiscount,10
+SilverDiscount,1,0,0.95,SilverDiscount5Off,80
+GoldDiscount,2,0,0.90,GoldDiscount10Off,90
+VipDiscount,3,0,0.85,VipDiscount15Off,100
