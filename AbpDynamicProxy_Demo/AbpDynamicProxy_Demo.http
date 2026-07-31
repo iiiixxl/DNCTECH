@@ -1,0 +1,23 @@
+@AbpDynamicProxy_Demo_HostAddress = http://localhost:5183
+
+### 1) 无权限 → 403（缺 Demo.Users）
+GET {{AbpDynamicProxy_Demo_HostAddress}}/api/users
+
+### 2) 仅 Default → 列表 200
+GET {{AbpDynamicProxy_Demo_HostAddress}}/api/users
+X-Permissions: Demo.Users
+
+### 3) 仅 Default 创建 → 403（缺 Demo.Users.Create）
+POST {{AbpDynamicProxy_Demo_HostAddress}}/api/users?userName=bob
+X-Permissions: Demo.Users
+
+### 4) Default + Create → 创建 200
+POST {{AbpDynamicProxy_Demo_HostAddress}}/api/users?userName=bob
+X-Permissions: Demo.Users,Demo.Users.Create
+
+### 5) Default + Delete → 删除 200
+DELETE {{AbpDynamicProxy_Demo_HostAddress}}/api/users/bob
+X-Permissions: Demo.Users,Demo.Users.Delete
+
+### 6) 查看 DI 解析的是否是代理
+GET {{AbpDynamicProxy_Demo_HostAddress}}/api/users/proxy-info
