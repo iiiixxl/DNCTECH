@@ -1,0 +1,23 @@
+@page
+@model Identity2FA_Demo.Pages.IndexModel
+@{
+    ViewData["Title"] = "首页";
+}
+<div class="card">
+    <h1>原生 Identity 2FA 演示</h1>
+    <p class="muted">使用 <code>UserManager</code> / <code>SignInManager</code> + SQLite。Authenticator 密钥存在 <code>AspNetUserTokens</code>。</p>
+    <ol>
+        <li>注册并登录</li>
+        <li>打开「管理 2FA」绑定 Authenticator App</li>
+        <li>退出后再次登录，会要求输入 6 位验证码</li>
+    </ol>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <p class="ok">已登录：@User.Identity?.Name</p>
+        <a class="btn" asp-page="/Account/Manage2FA">去开启 / 管理 2FA</a>
+    }
+    else
+    {
+        <a class="btn" asp-page="/Account/Register">开始注册</a>
+    }
+</div>

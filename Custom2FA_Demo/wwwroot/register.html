@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>注册 - Custom2FA</title>
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">注册<small>POST /api/register</small></div>
+      <nav class="nav" id="topnav"></nav>
+    </header>
+
+    <section class="panel">
+      <h1>创建账号</h1>
+      <p class="lead">注册成功会直接返回 access_token（尚未开 2FA）。</p>
+      <label>用户名</label>
+      <input id="userName" value="demo" autocomplete="username" />
+      <label>密码</label>
+      <input id="password" type="password" value="Pass123!" autocomplete="new-password" />
+      <label>邮箱（可选，勾选 Email 通道需要）</label>
+      <input id="email" type="email" value="demo@example.com" />
+      <label>手机（可选，勾选 Sms 通道需要）</label>
+      <input id="phone" value="13800000000" />
+      <div class="actions">
+        <button id="btnRegister" type="button">注册</button>
+        <a class="btn secondary" href="login.html">去登录</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>接口响应</h2>
+      <pre class="out" id="out">等待操作…</pre>
+    </section>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    Custom2FA.renderNav("register.html");
+    const out = document.getElementById("out");
+    document.getElementById("btnRegister").onclick = async () => {
+      const { ok, data } = await Custom2FA.api("/api/register", {
+        method: "POST",
+        body: {
+          userName: userName.value,
+          password: password.value,
+          email: email.value || null,
+          phone: phone.value || null
+        }
+      });
+      Custom2FA.applyAuthResult(data);
+      Custom2FA.showOut(out, data, ok);
+      Custom2FA.renderNav("register.html");
+      if (ok && data.accessToken) {
+        setTimeout(() => location.href = "manage.html", 600);
+      }
+    };
+  </script>
+</body>
+</html>

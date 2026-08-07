@@ -1,0 +1,46 @@
+@page
+@model Identity2FA_Demo.Pages.Account.Manage2FAModel
+@{
+    ViewData["Title"] = "管理 2FA";
+}
+<div class="card">
+    <h2>管理 Authenticator 2FA</h2>
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <p class="ok">@Model.StatusMessage</p>
+    }
+
+    @if (Model.Is2faEnabled)
+    {
+        <p class="ok">当前已启用 2FA。</p>
+        <form method="post" asp-page-handler="Disable">
+            <button type="submit">关闭 2FA</button>
+        </form>
+    }
+    else
+    {
+        <p class="muted">1. 用 Microsoft Authenticator / Google Authenticator 扫描下方 otpauth（或手动输入密钥）。</p>
+        <p>密钥：</p>
+        <div class="code">@Model.SharedKey</div>
+        <p>otpauth URI：</p>
+        <div class="code">@Model.AuthenticatorUri</div>
+        <p class="muted">2. 输入 App 中的 6 位码以确认并启用。</p>
+        <form method="post" asp-page-handler="Enable">
+            <div asp-validation-summary="All"></div>
+            <label>验证码</label>
+            <input asp-for="Code" autocomplete="one-time-code" />
+            <button type="submit">验证并启用 2FA</button>
+        </form>
+    }
+
+    @if (Model.RecoveryCodes is { Length: > 0 })
+    {
+        <h3>恢复码</h3>
+        <ul>
+            @foreach (var c in Model.RecoveryCodes)
+            {
+                <li class="code">@c</li>
+            }
+        </ul>
+    }
+</div>

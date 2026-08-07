@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>二次认证 - Custom2FA</title>
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">二次认证<small>POST /api/login/2fa · /api/login/recovery</small></div>
+      <nav class="nav" id="topnav"></nav>
+    </header>
+
+    <section class="panel">
+      <h1>完成第二段登录</h1>
+      <p class="lead">使用登录返回的 mfa_ticket。请选择你自己启用的 provider。</p>
+
+      <label>mfa_ticket</label>
+      <textarea id="mfaTicket" rows="3"></textarea>
+
+      <label>可选方式（来自登录响应 providers）</label>
+      <div class="chips" id="providerChips"></div>
+      <select id="provider"></select>
+
+      <label>验证码</label>
+      <input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="Authenticator=App 6位；Sms/Email Demo 任意≥4位" />
+
+      <div class="actions">
+        <button id="btn2fa" type="button">提交 2FA</button>
+        <button id="btnRecovery" class="secondary" type="button">用恢复码登录</button>
+        <a class="btn secondary" href="login.html">返回登录</a>
+      </div>
+
+      <label>恢复码（可选）</label>
+      <input id="recovery" />
+      <p class="hint">Sms/Email 在本 Demo 未接真实网关，仅演示通道选择；Authenticator 请用手机 App 实时码。</p>
+    </section>
+
+    <section class="panel">
+      <h2>接口响应</h2>
+      <pre class="out" id="out">等待操作…</pre>
+    </section>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    Custom2FA.renderNav("mfa.html");
+    const out = document.getElementById("out");
+    mfaTicket.value = Custom2FA.getMfaTicket();
+
+    function fillProviders() {
+      const list = Custom2FA.getProviders();
+      const sel = document.getElementById("provider");
+      const chips = document.getElementById("providerChips");
+      if (!list.length) {
+        sel.innerHTML = `<option value="Authenticator">Authenticator</option>
+          <option value="Sms">Sms</option>
+          <option value="Email">Email</option>`;
+        chips.innerHTML = `<span class="chip">暂无缓存 providers，可手选</span>`;
+        return;
+      }
+      sel.innerHTML = list.map(p => `<option value="${p}">${p}</option>`).join("");
+      chips.innerHTML = list.map(p => `<span class="chip on">${p}</span>`).join("");
+    }
+    fillProviders();
+
+    if (!mfaTicket.value) {
+      Custom2FA.showOut(out, "没有 mfa_ticket。请先在登录页用已开启 2FA 的账号登录。", false);
+    }
+
+    document.getElementById("btn2fa").onclick = async () => {
+      const { ok, data } = await Custom2FA.api("/api/login/2fa", {
+        method: "POST",
+        body: {
+          mfaTicket: mfaTicket.value,
+          provider: provider.value,
+          code: code.value
+        }
+      });
+      Custom2FA.applyAuthResult(data);
+      Custom2FA.showOut(out, data, ok);
+      Custom2FA.renderNav("mfa.html");
+      if (ok && data.accessToken) setTimeout(() => location.href = "manage.html", 500);
+    };
+
+    document.getElementById("btnRecovery").onclick = async () => {
+      const { ok, data } = await Custom2FA.api("/api/login/recovery", {
+        method: "POST",
+        body: { mfaTicket: mfaTicket.value, recoveryCode: recovery.value }
+      });
+      Custom2FA.applyAuthResult(data);
+      Custom2FA.showOut(out, data, ok);
+      Custom2FA.renderNav("mfa.html");
+      if (ok && data.accessToken) setTimeout(() => location.href = "manage.html", 500);
+    };
+  </script>
+</body>
+</html>

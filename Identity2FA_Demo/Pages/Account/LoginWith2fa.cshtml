@@ -1,0 +1,17 @@
+@page
+@model Identity2FA_Demo.Pages.Account.LoginWith2faModel
+@{
+    ViewData["Title"] = "二次认证";
+}
+<div class="card">
+    <h2>二次认证</h2>
+    <p class="muted">密码已通过。请输入 Authenticator App 中的 6 位验证码完成登录（对应 Identity 的 TwoFactorAuthenticatorSignInAsync）。</p>
+    <form method="post">
+        <input type="hidden" name="rememberMe" value="@Model.RememberMe.ToString()" />
+        <div asp-validation-summary="ModelOnly"></div>
+        <label>验证码</label>
+        <input asp-for="Input.TwoFactorCode" autocomplete="one-time-code" />
+        <label><input asp-for="Input.RememberMachine" /> 记住此浏览器（跳过后续 2FA）</label>
+        <button type="submit">验证并登录</button>
+    </form>
+</div>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>管理 2FA - Custom2FA</title>
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">管理 2FA<small>需 Bearer access_token</small></div>
+      <nav class="nav" id="topnav"></nav>
+    </header>
+
+    <section class="panel">
+      <h1>当前资料</h1>
+      <p class="lead">GET /api/me · 显示位标志与可用 providers。</p>
+      <div class="actions">
+        <button id="btnMe" type="button">刷新 /api/me</button>
+        <a class="btn secondary" href="login.html">重新登录</a>
+      </div>
+      <pre class="out" id="profileOut" style="margin-top:1rem">点击刷新…</pre>
+    </section>
+
+    <div class="grid-2">
+      <section class="panel">
+        <h2>1. 绑定 Authenticator</h2>
+        <p class="hint">先点「获取绑定信息」，再<strong>任选</strong>扫码或手动输密钥，最后用 App 6 位码确认启用。</p>
+        <div class="actions">
+          <button id="btnSetup" type="button">获取绑定信息</button>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab active" data-bind="qr" id="tabQr">扫码绑定</button>
+          <button type="button" class="tab" data-bind="manual" id="tabManual">手动输入密钥</button>
+        </div>
+
+        <div id="paneQr" class="bind-pane active">
+          <div class="qr-box">
+            <img id="qrImg" width="200" height="200" alt="Authenticator 二维码" hidden />
+            <p class="hint" id="qrHint">获取绑定信息后，用 Authenticator App 扫描上方二维码。</p>
+          </div>
+        </div>
+
+        <div id="paneManual" class="bind-pane">
+          <p class="hint">在 App 中选择「输入设置密钥 / Enter a setup key」，账号名可填你的用户名。</p>
+          <label>密钥（可复制）</label>
+          <div class="key-display" id="sharedKeyDisplay">尚未获取</div>
+          <input id="sharedKey" type="hidden" />
+          <label>otpauth URI（调试用）</label>
+          <textarea id="otpauth" rows="2" readonly></textarea>
+          <div class="actions">
+            <button type="button" class="secondary" id="btnCopyKey">复制密钥</button>
+          </div>
+        </div>
+
+        <label>App 当前 6 位验证码（两种绑定方式最后都要填）</label>
+        <input id="enableCode" inputmode="numeric" autocomplete="one-time-code" placeholder="例如 123456" />
+        <div class="actions">
+          <button id="btnEnable" type="button">确认启用 2FA</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>2. 设置方式位标志</h2>
+        <p class="hint">POST /api/2fa/methods · 1|2|4，全开填 7</p>
+        <label>
+          <input type="checkbox" id="mAuth" checked /> Authenticator (1)
+        </label>
+        <label>
+          <input type="checkbox" id="mSms" /> Sms (2)
+        </label>
+        <label>
+          <input type="checkbox" id="mEmail" /> Email (4)
+        </label>
+        <label>合成值</label>
+        <input id="methodsValue" type="number" value="1" />
+        <div class="actions">
+          <button id="btnMethods" type="button">保存 Methods</button>
+          <button id="btnDisable" class="danger" type="button">关闭全部 2FA</button>
+        </div>
+        <p class="hint">勾选值会原样写入 <code>TwoFactorMethods</code>。登录时再与「有密钥 / 手机已确认 / 邮箱已确认」求交得到 <code>providers</code>。</p>
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>3. 更新联系方式（Demo）</h2>
+      <p class="hint">POST /api/profile/contact · 方便把 Email/Sms 勾上</p>
+      <label>邮箱</label>
+      <input id="email" type="email" value="demo@example.com" />
+      <label><input type="checkbox" id="emailConfirmed" checked /> EmailConfirmed</label>
+      <label>手机</label>
+      <input id="phone" value="13800000000" />
+      <label><input type="checkbox" id="phoneConfirmed" checked /> PhoneConfirmed</label>
+      <div class="actions">
+        <button id="btnContact" type="button">保存联系方式</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>接口响应</h2>
+      <pre class="out" id="out">等待操作…</pre>
+    </section>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    Custom2FA.renderNav("manage.html");
+    const out = document.getElementById("out");
+    let latestOtpauth = "";
+
+    function formatKey(key) {
+      const raw = (key || "").replace(/\s+/g, "");
+      return raw.replace(/(.{4})/g, "$1 ").trim();
+    }
+
+    function setBindMode(mode) {
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.bind === mode));
+      paneQr.classList.toggle("active", mode === "qr");
+      paneManual.classList.toggle("active", mode === "manual");
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => setBindMode(tab.dataset.bind));
+    });
+
+    function renderQr(dataUrl) {
+      const img = document.getElementById("qrImg");
+      const hint = document.getElementById("qrHint");
+      if (!dataUrl) {
+        img.hidden = true;
+        img.removeAttribute("src");
+        hint.textContent = "尚未获取绑定信息。";
+        return;
+      }
+      img.src = dataUrl;
+      img.hidden = false;
+      hint.textContent = "用 Microsoft / Google Authenticator 扫描此二维码。";
+    }
+
+    function syncMethodsValue() {
+      let v = 0;
+      if (mAuth.checked) v |= 1;
+      if (mSms.checked) v |= 2;
+      if (mEmail.checked) v |= 4;
+      methodsValue.value = v;
+    }
+    [mAuth, mSms, mEmail].forEach(el => el.addEventListener("change", syncMethodsValue));
+    methodsValue.addEventListener("input", () => {
+      const v = Number(methodsValue.value) || 0;
+      mAuth.checked = (v & 1) === 1;
+      mSms.checked = (v & 2) === 2;
+      mEmail.checked = (v & 4) === 4;
+    });
+
+    async function refreshMe() {
+      try {
+        const { ok, data } = await Custom2FA.api("/api/me", { auth: true });
+        Custom2FA.showOut(profileOut, data, ok);
+        if (ok && data) {
+          if (data.email) email.value = data.email;
+          if (data.phoneNumber) phone.value = data.phoneNumber;
+          emailConfirmed.checked = !!data.emailConfirmed;
+          phoneConfirmed.checked = !!data.phoneConfirmed;
+          const v = Number(data.twoFactorMethods) || 0;
+          methodsValue.value = v;
+          mAuth.checked = (v & 1) === 1;
+          mSms.checked = (v & 2) === 2;
+          mEmail.checked = (v & 4) === 4;
+        }
+      } catch (e) {
+        Custom2FA.showOut(profileOut, String(e.message || e), false);
+      }
+    }
+
+    if (!Custom2FA.getToken()) {
+      Custom2FA.showOut(out, "没有 access_token，请先登录或注册。", false);
+    } else {
+      refreshMe();
+    }
+
+    btnMe.onclick = refreshMe;
+
+    btnSetup.onclick = async () => {
+      const { ok, data } = await Custom2FA.api("/api/2fa/setup", { auth: true });
+      Custom2FA.showOut(out, data, ok);
+      if (!ok) return;
+
+      latestOtpauth = data.authenticatorUri || "";
+      sharedKey.value = data.sharedKey || "";
+      sharedKeyDisplay.textContent = formatKey(data.sharedKey) || "无密钥";
+      otpauth.value = latestOtpauth;
+      renderQr(data.qrCodeImage || "");
+      if (!data.qrCodeImage) {
+        qrHint.textContent = "服务端未返回二维码，请改用「手动输入密钥」。";
+      }
+      setBindMode("qr");
+    };
+
+    btnCopyKey.onclick = async () => {
+      const raw = (sharedKey.value || "").replace(/\s+/g, "");
+      if (!raw) return;
+      try {
+        await navigator.clipboard.writeText(raw);
+        Custom2FA.showOut(out, "密钥已复制到剪贴板。", true);
+      } catch {
+        Custom2FA.showOut(out, "复制失败，请手动选中密钥。", false);
+      }
+    };
+
+    btnEnable.onclick = async () => {
+      const { ok, data } = await Custom2FA.api("/api/2fa/enable", {
+        method: "POST", auth: true, body: { code: enableCode.value }
+      });
+      Custom2FA.showOut(out, data, ok);
+      if (ok) refreshMe();
+    };
+
+    btnMethods.onclick = async () => {
+      syncMethodsValue();
+      const { ok, data } = await Custom2FA.api("/api/2fa/methods", {
+        method: "POST", auth: true, body: { methods: Number(methodsValue.value) || 0 }
+      });
+      Custom2FA.showOut(out, data, ok);
+      if (ok) refreshMe();
+    };
+
+    btnDisable.onclick = async () => {
+      if (!confirm("确定关闭全部 2FA？")) return;
+      const { ok, data } = await Custom2FA.api("/api/2fa/disable", { method: "POST", auth: true, body: {} });
+      Custom2FA.showOut(out, data, ok);
+      if (ok) refreshMe();
+    };
+
+    btnContact.onclick = async () => {
+      const { ok, data } = await Custom2FA.api("/api/profile/contact", {
+        method: "POST",
+        auth: true,
+        body: {
+          email: email.value,
+          emailConfirmed: emailConfirmed.checked,
+          phone: phone.value,
+          phoneConfirmed: phoneConfirmed.checked
+        }
+      });
+      Custom2FA.showOut(out, data, ok);
+      if (ok) refreshMe();
+    };
+  </script>
+</body>
+</html>

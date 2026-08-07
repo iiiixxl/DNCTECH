@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Custom2FA Demo</title>
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">Custom2FA_Demo<small>自建用户系统 · 调用后端 API</small></div>
+      <nav class="nav" id="topnav"></nav>
+    </header>
+
+    <h1>学习用二次认证 Demo</h1>
+    <p class="lead">页面只负责调用控制器接口（Auth / TwoFactor / Profile），不在前端伪造登录态。</p>
+
+    <div class="grid-2">
+      <section class="panel">
+        <h2>推荐流程</h2>
+        <ol class="steps">
+          <li>注册账号（可填邮箱/手机，便于勾选 Sms/Email 位）</li>
+          <li>登录拿到 access_token</li>
+          <li>在「管理 2FA」绑定 Authenticator，设置 Methods（如 7）</li>
+          <li>退出后再登录 → 进入「二次认证」页选 provider</li>
+        </ol>
+      </section>
+      <section class="panel">
+        <h2>页面入口</h2>
+        <ul class="list-links">
+          <li><a href="register.html">注册<small>POST /api/register</small></a></li>
+          <li><a href="login.html">登录<small>POST /api/login → token 或 mfa_ticket</small></a></li>
+          <li><a href="mfa.html">二次认证<small>POST /api/login/2fa | /api/login/recovery</small></a></li>
+          <li><a href="manage.html">管理 2FA<small>setup / enable / methods / me</small></a></li>
+        </ul>
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>位标志速查</h2>
+      <div class="chips">
+        <span class="chip on">Authenticator = 1</span>
+        <span class="chip on">Sms = 2</span>
+        <span class="chip on">Email = 4</span>
+        <span class="chip on">全选 = 7</span>
+      </div>
+      <p class="hint">登录返回的 <code>providers</code> = <code>TwoFactorMethods</code> ∩ 实际可用（有密钥 / 手机已确认 / 邮箱已确认）。</p>
+    </section>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>Custom2FA.renderNav("index.html");</script>
+</body>
+</html>

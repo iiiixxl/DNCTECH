@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>登录 - Custom2FA</title>
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">登录<small>POST /api/login</small></div>
+      <nav class="nav" id="topnav"></nav>
+    </header>
+
+    <section class="panel">
+      <h1>账密登录</h1>
+      <p class="lead">未开 2FA → access_token；已开 2FA → mfa_ticket + providers（不发正式 token）。</p>
+      <label>用户名</label>
+      <input id="userName" value="demo" autocomplete="username" />
+      <label>密码</label>
+      <input id="password" type="password" value="Pass123!" autocomplete="current-password" />
+      <div class="actions">
+        <button id="btnLogin" type="button">登录</button>
+        <a class="btn secondary" href="register.html">去注册</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>接口响应</h2>
+      <pre class="out" id="out">等待操作…</pre>
+    </section>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    Custom2FA.renderNav("login.html");
+    const out = document.getElementById("out");
+    document.getElementById("btnLogin").onclick = async () => {
+      const { ok, data } = await Custom2FA.api("/api/login", {
+        method: "POST",
+        body: { userName: userName.value, password: password.value }
+      });
+      Custom2FA.applyAuthResult(data);
+      Custom2FA.showOut(out, data, ok);
+      Custom2FA.renderNav("login.html");
+      if (ok && data.requiresTwoFactor) {
+        setTimeout(() => location.href = "mfa.html", 400);
+      } else if (ok && data.accessToken) {
+        setTimeout(() => location.href = "manage.html", 400);
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+@page
+@model Identity2FA_Demo.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "登录";
+}
+<div class="card">
+    <h2>登录</h2>
+    <form method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+        <label>邮箱</label>
+        <input asp-for="Input.Email" />
+        <label>密码</label>
+        <input asp-for="Input.Password" />
+        <label><input asp-for="Input.RememberMe" /> 记住我</label>
+        <button type="submit">登录</button>
+    </form>
+</div>

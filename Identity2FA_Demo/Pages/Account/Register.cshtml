@@ -1,0 +1,16 @@
+@page
+@model Identity2FA_Demo.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "注册";
+}
+<div class="card">
+    <h2>注册</h2>
+    <form method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+        <label>邮箱</label>
+        <input asp-for="Input.Email" />
+        <label>密码（至少 6 位）</label>
+        <input asp-for="Input.Password" />
+        <button type="submit">注册并登录</button>
+    </form>
+</div>
