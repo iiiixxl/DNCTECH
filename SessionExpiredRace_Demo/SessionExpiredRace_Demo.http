@@ -1,0 +1,6 @@
+@SessionExpiredRace_Demo_HostAddress = http://localhost:5190
+
+GET {{SessionExpiredRace_Demo_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

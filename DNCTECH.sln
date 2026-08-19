@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.6.11822.322 stable
+VisualStudioVersion = 18.6.11822.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "web", "web", "{47CFA45C-6A59-44D1-8C61-5188CAE18161}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity2FA_Demo", "Identity2FA_Demo\Identity2FA_Demo.csproj", "{E5F25F1C-742C-4E56-8012-5AFCEC3A3E6B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Custom2FA_Demo", "Custom2FA_Demo\Custom2FA_Demo.csproj", "{6B80CA77-1E5E-462E-94E3-458CC95C3F5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SessionExpiredRace_Demo", "SessionExpiredRace_Demo\SessionExpiredRace_Demo.csproj", "{C7646254-E7C7-42D5-9324-EB70E1B4DA83}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +131,18 @@ Global
 		{6B80CA77-1E5E-462E-94E3-458CC95C3F5B}.Release|x64.Build.0 = Release|Any CPU
 		{6B80CA77-1E5E-462E-94E3-458CC95C3F5B}.Release|x86.ActiveCfg = Release|Any CPU
 		{6B80CA77-1E5E-462E-94E3-458CC95C3F5B}.Release|x86.Build.0 = Release|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Debug|x64.Build.0 = Debug|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Debug|x86.Build.0 = Debug|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Release|x64.ActiveCfg = Release|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Release|x64.Build.0 = Release|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Release|x86.ActiveCfg = Release|Any CPU
+		{C7646254-E7C7-42D5-9324-EB70E1B4DA83}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
